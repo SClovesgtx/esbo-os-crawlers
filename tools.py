@@ -10,6 +10,9 @@ from time import sleep
 import pandas as pd 
 import re
 
+IDS_PDFS = [ 'ctl00_ConteudoPagina_gdvEntidade_ctl0{0}_lnkArquivo'.format(i)
+           for i in range(3,9)]
+
 
 def get(drive, xpath):
     element = WebDriverWait(drive, 20).until(
@@ -53,7 +56,7 @@ def get_id_tag_a_processos(browser):
     return numero_recursos_id_tag
 
 def iniciar_google_drive(path_do_google_drive):
-    prefs = {'download.default_directory' : 'home/cloves/Documentos/Crawler-Acordoes/data/pdf_acordoes'}
+    prefs = {'download.default_directory' : 'home/cloves/Documentos/Crawler-Acordoes/data/pdf_acordoes/'}
     webdriver.ChromeOptions().add_experimental_option('prefs', prefs)
     browser = webdriver.Chrome(path_do_google_drive)
     browser.maximize_window()  # para maximizar janela da página
@@ -149,3 +152,26 @@ def get_meta_data_acordao(browser, numero_acordao):
     apertar_botao(browser, '//*[@id="formAcordaos:j_id60:0:imageAnexos"]')
     return dic
 
+def get_table_Portal_Fazenda(browser):
+    tabela = browser.find_element_by_tag_name('tbody')
+    linhas = []
+    for row in tabela.find_elements_by_class_name('linha_grid'):
+        linha = []
+        for item in row.find_elements_by_tag_name('td'):
+            linha.append(item.text)
+        linhas.append(linha)
+    
+    for row in tabela.find_elements_by_class_name('linha_grid_alt'):
+        linha = []
+        for item in row.find_elements_by_tag_name('td'):
+            linha.append(item.text)
+        linhas.append(linha)
+
+    return linhas
+
+def download_pdfs_fazenda(browser):
+    for id_ in IDS_PDFS:
+        try:
+            browser.find_element_by_id(id_).click()
+        except:
+            pass
